@@ -25,8 +25,6 @@ export class OpenSeaService {
     };
   }
 
-  //   url: 'https://testnets-api.opensea.io/api/v2/chain/sepolia/account/address/nfts',
-
   async getNFTsByAccount(address: string): Promise<any> {
     const options = this.createGetRequestConfig(
       `${this.baseUrl}/chain/${this.chainName}/account/${address}/nfts`,
