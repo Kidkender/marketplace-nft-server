@@ -1,5 +1,6 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CollectionsModule } from './collections/collections.module';
@@ -8,7 +9,6 @@ import { NftModule } from './nft/nft.module';
 import { OpenSeaModule } from './open-sea/openSea.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { UserModule } from './user/user.module';
-import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
