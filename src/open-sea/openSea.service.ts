@@ -4,6 +4,8 @@ import { AxiosRequestConfig } from 'axios';
 import { AxiosWrapperService } from './axios-wrapper.service';
 import { CollectionDto } from './dto/collection.dto';
 import { NftData } from './dto/nft.data';
+import { GetNftsDto } from './dto/get-nfts.dto';
+import { URLSearchParams } from 'url';
 
 @Injectable()
 export class OpenSeaService {
@@ -29,16 +31,31 @@ export class OpenSeaService {
     };
   }
 
-  async getNFTsByAccount(address: string): Promise<NftData> {
-    const options = this.createGetRequestConfig(
-      `${this.baseUrl}/chain/${this.chainName}/account/${address}/nfts?limit=200`,
-    );
+  async getNFTsByAccount(request: GetNftsDto): Promise<NftData> {
+    const { address, collection } = request;
+    const params = new URLSearchParams();
+    let url = `${this.baseUrl}/chain/${this.chainName}/account/${address}/nfts`;
+
+    if (collection) {
+      params.append('collection', collection);
+    }
+    params.append('limit', '200');
+
+    url += `?${params.toString()}`;
+    const options = this.createGetRequestConfig(url);
     const data = this.axiosWrapperService.request(options);
     return data;
   }
 
-  async filterUniqueCollections(address: string): Promise<CollectionDto[]> {
-    const response = await this.getNFTsByAccount(address);
+  async filterUniqueCollections(
+    address: string,
+    collection?: string,
+  ): Promise<CollectionDto[]> {
+    const request: GetNftsDto = {
+      address,
+      collection,
+    };
+    const response = await this.getNFTsByAccount(request);
     const nfts = response.nfts;
 
     if (!Array.isArray(nfts)) {
