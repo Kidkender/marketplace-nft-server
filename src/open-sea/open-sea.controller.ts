@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { OpenSeaService } from './openSea.service';
 import { GetNftsDto } from './dto/get-nfts.dto';
 
@@ -6,7 +6,7 @@ import { GetNftsDto } from './dto/get-nfts.dto';
 export class OpenSeaController {
   constructor(private readonly openSeaService: OpenSeaService) {}
 
-  @Get('/account/nfts')
+  @Post('/account/nfts')
   async getNFTsByAccount(@Body() request: GetNftsDto) {
     return await this.openSeaService.getNFTsByAccount(request);
   }
