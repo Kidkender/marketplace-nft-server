@@ -98,4 +98,12 @@ export class OpenSeaService {
     );
     return this.axiosWrapperService.request(options);
   }
+
+  //  https://testnets-api.opensea.io/api/v2/chain/sepolia/contract/{address}/nfts/{tokenId} \
+  async getNFT(address: string, tokenId: number): Promise<any> {
+    const options = this.createGetRequestConfig(
+      `${this.baseUrl}/chain/${this.chainName}/contract/${address}/nfts/${tokenId}`,
+    );
+    return this.axiosWrapperService.request(options);
+  }
 }

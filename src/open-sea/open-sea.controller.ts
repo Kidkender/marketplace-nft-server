@@ -30,4 +30,12 @@ export class OpenSeaController {
   async getCollectionsByOwner(@Param('address') address: string) {
     return await this.openSeaService.filterUniqueCollections(address);
   }
+
+  @Get('nft/:address/:tokenId')
+  async getNFT(
+    @Param('address') address: string,
+    @Param('tokenId') tokenId: number,
+  ): Promise<any> {
+    return this.openSeaService.getNFT(address, tokenId);
+  }
 }
