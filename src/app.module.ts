@@ -9,6 +9,7 @@ import { NftModule } from './nft/nft.module';
 import { OpenSeaModule } from './open-sea/openSea.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { UserModule } from './user/user.module';
+import { ListingModule } from './listing/listing.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { UserModule } from './user/user.module';
     NftModule,
     OpenSeaModule,
     HttpModule.registerAsync({ useClass: HttpConfigService }),
+    ListingModule,
   ],
   controllers: [AppController],
   providers: [AppService],
