@@ -1,7 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { Listing } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateListingDto } from './dto/create-listing.dto';
-import { Listing } from '@prisma/client';
 
 @Injectable()
 export class ListingService {
@@ -25,6 +25,35 @@ export class ListingService {
         createdAt: 'desc',
       },
       take: 10,
+    });
+  }
+  async findListingByCollectionAndToken(
+    collection: string,
+    tokenId: number,
+  ): Promise<Listing> {
+    const listing = await this.prismaService.listing.findFirst({
+      where: {
+        collectionAddress: collection,
+        tokenId: tokenId,
+      },
+    });
+    if (!listing) {
+      throw new BadRequestException(
+        `No listing found with token ${tokenId} at collection ${collection}`,
+      );
+    }
+    return listing;
+  }
+
+  async removeListing(collectionAddress: string, tokenId: number) {
+    const listing = await this.findListingByCollectionAndToken(
+      collectionAddress,
+      tokenId,
+    );
+    return await this.prismaService.listing.delete({
+      where: {
+        id: listing.id,
+      },
     });
   }
 }

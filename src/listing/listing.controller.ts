@@ -1,6 +1,6 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
-import { ListingService } from './listing.service';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { CreateListingDto } from './dto/create-listing.dto';
+import { ListingService } from './listing.service';
 
 @Controller('listing')
 export class ListingController {
@@ -14,5 +14,13 @@ export class ListingController {
   @Get('latest')
   async getLatestListing() {
     return this.listingService.getTopLatestListing();
+  }
+
+  @Delete(':collectionAddress/:tokenId')
+  async deleteListing(
+    @Param('collectionAddress') collectionAddress: string,
+    @Param('tokenId') tokenId: number,
+  ) {
+    return this.listingService.removeListing(collectionAddress, tokenId);
   }
 }
