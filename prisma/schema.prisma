@@ -30,6 +30,7 @@ model Collections {
   name String
   symbol String
   uri String
+  imageUrl String?
   description String?
   totalSupply Int?
   address String

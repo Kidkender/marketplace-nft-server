@@ -38,4 +38,9 @@ export class OpenSeaController {
   ): Promise<any> {
     return this.openSeaService.getNFT(address, tokenId);
   }
+
+  @Get('collections/fetch')
+  async fetchAndCreateCollection() {
+    return this.openSeaService.fetchAndCreateCollections();
+  }
 }

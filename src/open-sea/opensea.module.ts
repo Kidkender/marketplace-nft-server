@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
-import { OpenSeaService } from '../open-sea/openSea.service';
+import { CollectionsModule } from 'src/collections/collections.module';
 import { AxiosWrapperService } from '../open-sea/axios-wrapper.service';
+import { OpenSeaService } from '../open-sea/openSea.service';
 import { OpenSeaController } from './open-sea.controller';
 
 @Module({
-  imports: [],
+  imports: [CollectionsModule],
   controllers: [OpenSeaController],
   providers: [OpenSeaService, AxiosWrapperService],
 })

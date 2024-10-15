@@ -34,7 +34,7 @@ export class ListingService {
     const listing = await this.prismaService.listing.findFirst({
       where: {
         collectionAddress: collection,
-        tokenId: tokenId,
+        tokenId: Number(tokenId),
       },
     });
     if (!listing) {

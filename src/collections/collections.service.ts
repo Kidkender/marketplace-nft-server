@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateCollectionDto } from './dto/create-collection.dto';
+import { Collections, Prisma } from '@prisma/client';
 
 @Injectable()
 export class CollectionsService {
@@ -23,5 +24,24 @@ export class CollectionsService {
     });
 
     this.logger.log(`Collection ${collection.name} created`);
+  }
+
+  async createMultiCollection(data: Prisma.CollectionsCreateManyInput[]) {
+    const collections = await this.prismaService.collections.createMany({
+      data: data,
+      // skipDuplicates: true,
+    });
+    this.logger.log(`${collections.count} Collection created`);
+  }
+
+  async getCollectionsWithImage(): Promise<Collections[]> {
+    const collections = await this.prismaService.collections.findMany({
+      where: {
+        imageUrl: {
+          not: '',
+        },
+      },
+    });
+    return collections;
   }
 }
