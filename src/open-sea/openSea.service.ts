@@ -114,7 +114,7 @@ export class OpenSeaService {
 
   async fetchAndCreateCollections() {
     const options = this.createGetRequestConfig(
-      `${this.baseUrl}/collections?chain=${this.chainName}&limit=20&order_by=num_owners`,
+      `${this.baseUrl}/collections?chain=${this.chainName}&limit=20`,
     );
     const response: CollectionsResponse =
       await this.axiosWrapperService.request(options);

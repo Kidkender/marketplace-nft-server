@@ -29,7 +29,7 @@ export class CollectionsService {
   async createMultiCollection(data: Prisma.CollectionsCreateManyInput[]) {
     const collections = await this.prismaService.collections.createMany({
       data: data,
-      // skipDuplicates: true,
+      skipDuplicates: true,
     });
     this.logger.log(`${collections.count} Collection created`);
   }
@@ -41,6 +41,7 @@ export class CollectionsService {
           not: '',
         },
       },
+      take: 7,
     });
     return collections;
   }

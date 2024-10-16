@@ -33,7 +33,7 @@ model Collections {
   imageUrl String?
   description String?
   totalSupply Int?
-  address String
+  address String @unique
 
   user User @relation(fields: [userId], references: [id])
   userId Int
