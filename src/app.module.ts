@@ -10,6 +10,7 @@ import { OpenSeaModule } from './open-sea/openSea.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { UserModule } from './user/user.module';
 import { ListingModule } from './listing/listing.module';
+import { ActivityModule } from './activity/activity.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { ListingModule } from './listing/listing.module';
     OpenSeaModule,
     HttpModule.registerAsync({ useClass: HttpConfigService }),
     ListingModule,
+    ActivityModule,
   ],
   controllers: [AppController],
   providers: [AppService],

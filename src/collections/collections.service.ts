@@ -35,14 +35,27 @@ export class CollectionsService {
   }
 
   async getCollectionsWithImage(): Promise<Collections[]> {
-    const collections = await this.prismaService.collections.findMany({
+    const specificAddress = '0xba9f7492055c25A302eae4d2375C6472D69b7A77';
+
+    const specific = await this.prismaService.collections.findFirst({
       where: {
+        address: specificAddress,
         imageUrl: {
           not: '',
         },
       },
-      take: 7,
     });
-    return collections;
+
+    const topCollections = await this.prismaService.collections.findMany({
+      where: {
+        imageUrl: {
+          not: '',
+        },
+        address: specific ? { not: specificAddress } : undefined,
+      },
+      take: specific ? 9 : 10,
+    });
+
+    return specific ? [specific, ...topCollections] : topCollections;
   }
 }
