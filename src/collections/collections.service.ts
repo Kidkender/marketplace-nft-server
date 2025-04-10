@@ -35,11 +35,16 @@ export class CollectionsService {
   }
 
   async getCollectionsWithImage(): Promise<Collections[]> {
-    const specificAddress = '0xba9f7492055c25A302eae4d2375C6472D69b7A77';
+    const specificAddress = [
+      '0xba9f7492055c25A302eae4d2375C6472D69b7A77',
+      '0xd08efc644333d831caab0d19789e452265d8f4b5',
+    ];
 
-    const specific = await this.prismaService.collections.findFirst({
+    const specific = await this.prismaService.collections.findMany({
       where: {
-        address: specificAddress,
+        address: {
+          in: specificAddress,
+        },
         imageUrl: {
           not: '',
         },
@@ -51,11 +56,13 @@ export class CollectionsService {
         imageUrl: {
           not: '',
         },
-        address: specific ? { not: specificAddress } : undefined,
+        address: {
+          notIn: specific.map((c) => c.address),
+        },
       },
-      take: specific ? 9 : 10,
+      take: 10 - specific.length,
     });
 
-    return specific ? [specific, ...topCollections] : topCollections;
+    return [...specific, ...topCollections];
   }
 }

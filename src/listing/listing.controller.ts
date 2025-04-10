@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   Param,
+  ParseIntPipe,
   Post,
 } from '@nestjs/common';
 import { CreateListingDto } from './dto/create-listing.dto';
@@ -33,5 +34,30 @@ export class ListingController {
     @Param('tokenId') tokenId: number,
   ) {
     return this.listingService.removeListing(collectionAddress, tokenId);
+  }
+
+  @Get(':collectionAddress/:tokenId')
+  async findOne(
+    @Param('collectionAddress') collectionAddress: string,
+    @Param('tokenId', ParseIntPipe) tokenId: number,
+  ) {
+    return this.listingService.findListingByCollectionAndToken(
+      collectionAddress,
+      tokenId,
+    );
+  }
+
+  @Post('buy')
+  @HttpCode(HttpStatusCode.Ok)
+  async buyNft(
+    @Body()
+    body: {
+      wallet: string;
+      collectionAddress: string;
+      tokenId: number;
+    },
+  ) {
+    const { wallet, collectionAddress, tokenId } = body;
+    return this.listingService.buyNft(wallet, collectionAddress, tokenId);
   }
 }
