@@ -8,6 +8,8 @@ import { CollectionDto } from './dto/collection.dto';
 import { GetNftsDto } from './dto/get-nfts.dto';
 import { CollectionsResponse, NftData } from './dto/opensea.interface';
 import { Prisma } from '@prisma/client';
+import { ListingService } from 'src/listing/listing.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class OpenSeaService {
@@ -15,6 +17,8 @@ export class OpenSeaService {
     private readonly axiosWrapperService: AxiosWrapperService,
     private readonly configService: ConfigService,
     private readonly collectionService: CollectionsService,
+    private readonly listingService: ListingService,
+    private readonly prismaService: PrismaService,
   ) {}
   baseUrl = 'https://testnets-api.opensea.io/api/v2';
   chainName = 'sepolia';
@@ -99,7 +103,30 @@ export class OpenSeaService {
     const options = this.createGetRequestConfig(
       `${this.baseUrl}/chain/${this.chainName}/contract/${address}/nfts?limit=20`,
     );
-    return this.axiosWrapperService.request(options);
+
+    const result = await this.axiosWrapperService.request(options);
+
+    if (!result?.nfts?.length) return result;
+
+    const tokenIds = result.nfts.map((nft) => Number(nft.identifier));
+
+    const listings = await this.prismaService.listing.findMany({
+      where: {
+        collectionAddress: address,
+        tokenId: { in: tokenIds },
+        status: 'ACTIVE',
+      },
+    });
+
+    const listingMap = new Map<number, any>();
+    listings.forEach((l) => listingMap.set(l.tokenId, l));
+
+    result.nfts = result.nfts.map((nft) => {
+      const listing = listingMap.get(Number(nft.identifier));
+      return listing ? { ...nft, price: listing.price } : nft;
+    });
+
+    return result;
   }
 
   //  https://testnets-api.opensea.io/api/v2/chain/sepolia/contract/{address}/nfts/{tokenId} \
@@ -107,7 +134,16 @@ export class OpenSeaService {
     const options = this.createGetRequestConfig(
       `${this.baseUrl}/chain/${this.chainName}/contract/${address}/nfts/${tokenId}`,
     );
-    return this.axiosWrapperService.request(options);
+    const [result, listing] = await Promise.all([
+      this.axiosWrapperService.request(options),
+      this.listingService.findListingByCollectionAndToken(address, tokenId),
+    ]);
+
+    if (listing?.price) {
+      result.price = listing.price;
+    }
+
+    return result;
   }
 
   // 'https://testnets-api.opensea.io/api/v2/collections?chain=sepolia&limit=10' \

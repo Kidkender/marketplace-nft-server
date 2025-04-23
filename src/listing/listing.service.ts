@@ -30,23 +30,38 @@ export class ListingService {
   }
 
   async createListing(data: CreateListingDto) {
+    const { collectionAddress, tokenId, wallet, price } = data;
+
+    const existListing = await this.prismaService.listing.findFirst({
+      where: { collectionAddress, tokenId },
+    });
+
+    if (existListing) {
+      if (existListing.status === 'ACTIVE') return;
+      if (existListing.status === 'CANCELED') {
+        await this.prismaService.listing.update({
+          where: { id: existListing.id },
+          data: {
+            status: 'ACTIVE',
+            price,
+          },
+        });
+        return;
+      }
+    }
+
     const listing = await this.prismaService.listing.create({
-      data: {
-        ...data,
-        status: 'ACTIVE',
-      },
+      data: { ...data, status: 'ACTIVE' },
     });
 
     await this.activityService.createActivity({
       action: ActivityAction.SELL,
-      description: `User ${data.wallet} listed NFT with price ${data.price}`,
-      price: data.price,
-      userAddress: data.wallet,
+      description: `User ${wallet} listed NFT with price ${price}`,
+      price,
+      userAddress: wallet,
     });
 
-    this.logger.log(
-      `Created listing for ${listing.tokenId} at ${listing.collectionAddress}`,
-    );
+    this.logger.log(`Created listing for ${tokenId} at ${collectionAddress}`);
     return listing;
   }
 
@@ -68,13 +83,12 @@ export class ListingService {
       where: {
         collectionAddress: collection,
         tokenId: Number(tokenId),
+        status: 'ACTIVE',
       },
     });
 
     if (!listing) {
-      throw new BadRequestException(
-        `No listing found with token ${tokenId} at ${collection}`,
-      );
+      return;
     }
 
     return listing;

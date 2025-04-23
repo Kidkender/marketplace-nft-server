@@ -7,5 +7,6 @@ import { ActivityModule } from 'src/activity/activity.module';
   imports: [ActivityModule],
   providers: [ListingService],
   controllers: [ListingController],
+  exports: [ListingService],
 })
 export class ListingModule {}

@@ -15,8 +15,7 @@ export class CreateListingDto {
   price: number;
 
   @IsOptional()
-  @IsString()
-  imageUrl?: string;
+  imageUrl: string;
 
   @IsString()
   wallet: string;
