@@ -60,7 +60,7 @@ export class CollectionsService {
           notIn: specific.map((c) => c.address),
         },
       },
-      take: 20 - specific.length,
+      take: 10 - specific.length,
     });
 
     return [...specific, ...topCollections];
