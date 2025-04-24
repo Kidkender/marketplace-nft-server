@@ -101,9 +101,7 @@ export class ListingService {
     );
 
     if (listing.status !== 'ACTIVE') {
-      throw new BadRequestException(
-        `Listing already ${listing.status.toLowerCase()}`,
-      );
+      return;
     }
 
     const updated = await this.prismaService.listing.update({

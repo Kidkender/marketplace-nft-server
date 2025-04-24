@@ -1,15 +1,15 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Prisma } from '@prisma/client';
 import { AxiosRequestConfig } from 'axios';
 import { CollectionsService } from 'src/collections/collections.service';
+import { ListingService } from 'src/listing/listing.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { URLSearchParams } from 'url';
 import { AxiosWrapperService } from './axios-wrapper.service';
 import { CollectionDto } from './dto/collection.dto';
 import { GetNftsDto } from './dto/get-nfts.dto';
-import { CollectionsResponse, NftData } from './dto/opensea.interface';
-import { Prisma } from '@prisma/client';
-import { ListingService } from 'src/listing/listing.service';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { CollectionsResponse } from './dto/opensea.interface';
 
 @Injectable()
 export class OpenSeaService {
@@ -38,7 +38,7 @@ export class OpenSeaService {
     };
   }
 
-  async getNFTsByAccount(request: GetNftsDto): Promise<NftData> {
+  async getNFTsByAccount(request: GetNftsDto): Promise<any> {
     const { address, collection } = request;
     const params = new URLSearchParams();
     let url = `${this.baseUrl}/chain/${this.chainName}/account/${address}/nfts`;
@@ -50,8 +50,39 @@ export class OpenSeaService {
 
     url += `?${params.toString()}`;
     const options = this.createGetRequestConfig(url);
-    const data = this.axiosWrapperService.request(options);
-    return data;
+    const result = await this.axiosWrapperService.request(options);
+
+    if (!result?.nfts?.length) return result;
+
+    const nftIdentifiers = result.nfts.map((nft) => ({
+      collectionAddress: nft.contract,
+      tokenId: Number(nft.identifier),
+    }));
+
+    const listings = await this.prismaService.listing.findMany({
+      where: {
+        OR: nftIdentifiers.map(({ collectionAddress, tokenId }) => ({
+          collectionAddress,
+          tokenId,
+          status: 'ACTIVE',
+        })),
+      },
+    });
+
+    const listingMap = new Map();
+
+    listings.forEach((listing) => {
+      const key = `${listing.collectionAddress}-${listing.tokenId}`;
+      listingMap.set(key, listing);
+    });
+
+    result.nfts = result.nfts.map((nft) => {
+      const key = `${nft.contract}-${Number(nft.identifier)}`;
+      const listing = listingMap.get(key);
+      return listing ? { ...nft, price: listing.price } : nft;
+    });
+
+    return result;
   }
 
   async filterUniqueCollections(
